@@ -18,7 +18,7 @@ Post, Put and Delete functions will be gradually added in future releases.
 | [courses](#access-courses) | X | | | |
 | [resource sharing partners](#access-resource-sharing-partners) | X | | | |
 | [task-lists](#access-task-lists) | X | | | |
-| [users](#access-users) | X | In Progress | In Progress | In Progress |
+| [users](#access-users) | X | In Progress | | |
 | [electronic](#access-electronic) | X | | | |
 
 ## Use
