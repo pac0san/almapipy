@@ -1,3 +1,5 @@
+#-*- coding: utf-8-unix -*-
+
 from setuptools import setup
 from setuptools import find_packages
 
