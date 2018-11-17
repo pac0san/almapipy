@@ -1,3 +1,5 @@
+#-*- coding: utf-8-unix -*-
+
 from .client import Client
 from . import utils
 
@@ -40,7 +42,7 @@ class SubClientElectronicCollections(Client):
         """Retrieve a list of electronic collections.
 
         Args:
-            collection_id (str): 	Unique ID of the electronic collection.
+            collection_id (str):        Unique ID of the electronic collection.
             query (dict): Search query for filtering a course list. Optional.
                 Searching for words from fields: [interface_name, keywords,
                 name, po_line_id]. Only AND operator is supported for multiple filters.

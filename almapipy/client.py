@@ -1,3 +1,5 @@
+#-*- coding: utf-8-unix -*-
+
 """
 Common Client for interacting with Alma API
 """

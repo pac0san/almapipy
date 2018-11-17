@@ -1,3 +1,5 @@
+#-*- coding: utf-8-unix -*-
+
 from .client import Client
 from . import utils
 
@@ -350,7 +352,7 @@ class SubClientBibsRequests(Client):
         Args:
             bib_id (str): The bib ID (mms_id).
             period (str or int): The number of days/weeks/months to retrieve availability for.
-            period_type (str): 	The type of period of interest. Optional. Possible values: days, weeks, months.
+            period_type (str):  The type of period of interest. Optional. Possible values: days, weeks, months.
             holding_id (str): The Holding Record ID (holding_id).
             item_id (str): The holding item ID (item_pid).
             q_params (dict): Any additional query parameters.

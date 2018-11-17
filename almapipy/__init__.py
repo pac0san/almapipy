@@ -1,3 +1,5 @@
+#-*- coding: utf-8-unix -*-
+
 """
 Python client for Ex Libris Alma
 """

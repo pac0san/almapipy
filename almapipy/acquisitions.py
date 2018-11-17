@@ -1,3 +1,5 @@
+#-*- coding: utf-8-unix -*-
+
 from .client import Client
 from . import utils
 
@@ -87,7 +89,7 @@ class SubClientAcquistionsPO(Client):
         """Retrieve a list or a single PO-Line.
 
         Args:
-            po_line_id (str): 	The PO-Line number ('number' field in record).
+            po_line_id (str):   The PO-Line number ('number' field in record).
             query (dict): Search query for filtering a user list. Optional.
                 Searching for words from fields: [title, author, mms_id,
                 publisher, publication_year, publication_place, issn_isbn,
@@ -143,7 +145,7 @@ class SubClientAcquistionsPO(Client):
         """Retrieve a list items related to a specific PO-line
 
         Args:
-            po_line_id (str): 	The PO-Line number ('number' field in record).
+            po_line_id (str):   The PO-Line number ('number' field in record).
             q_params (dict): Any additional query parameters.
             raw (bool): If true, returns raw requests object.
 
@@ -331,7 +333,7 @@ class SubClientAcquistionsInvoices(Client):
         """Retrieve a list or a single invoice.
 
         Args:
-            invoice_id (str): 	The invoice id.
+            invoice_id (str):   The invoice id.
             query (dict): Search query for filtering a user list. Optional.
                 Searching for words from fields: [invoice_number, vendor_code].
                 Only AND operator is supported for multiple filters.
