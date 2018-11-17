@@ -7,7 +7,7 @@ class SubClientUsers(Client):
     Alma provides a set of Web services for handling user information,
     enabling you to quickly and easily manipulate user details.
     These Web services can be used by external systems
-    such as student information systems (SIS)—to retrieve or update user data.
+    such as student information systems (SIS) to retrieve or update user data.
     For more info: https://developers.exlibrisgroup.com/alma/apis/users
     """
 
@@ -84,6 +84,55 @@ class SubClientUsers(Client):
                                          response=response, data_key='user')
         return response
 
+
+    def post(self, identifier, id_type, user_data={}, raw=False):
+        """Create a single user if it does not exists yet in Alma
+
+        Args:
+            id_type (str): The identifier type for the user
+                Values: from the User Identifier Type code table.
+            identifier (str): The identifier itself for the user.
+            user_data (dict): Data for user enrollment.
+                Setting words for fields: [first_name, last_name,
+                middle_name, email, job_category, general_info].
+                Format {'field': 'value', 'field2', 'value2'}.
+                e.g. data = {'first_name': 'Sterling', 'last_name': 'Archer'}
+            raw (bool): If true, returns raw requests object.
+
+        Returns:
+            The user (at Alma) if a new user is created.
+            Empty list if the 'identifier' was already set. 
+
+        """
+
+        args = {}
+        args['apikey'] = self.cnxn_params['api_key']
+
+        url = self.cnxn_params['api_uri_full']
+
+        # Search query for the 'identifier' in Alma
+        query = {}
+        query['identifier'] = identifier
+        args['id_type'] = id_type
+        args['q'] = self.__format_query__(query)
+
+        # Search for a user with this 'user_identifier'
+        response = self.read(url, args, raw=raw)
+
+        if not response:
+            # No user exists with this 'identifier': Let's create it.
+            user_data['identifier'] = identifier
+            args['q'] = self.__format_query__(user_data)
+
+# TODO: status, segment_type?
+            args['status'] = 'ACTIVE'
+            args['segment_type'] = 'External'
+            
+# TODO: define 'self.write' in Client Class at client.py using 'request.post'
+            response = self.write(url, args, raw=raw)
+        
+        return response
+    
 
 class SubClientUsersLoans(Client):
     """Handles the Loans endpoints of Users API"""
