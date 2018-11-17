@@ -73,6 +73,7 @@ class Client(object):
 
         return content
 
+
     def read(self, url, args, raw=False):
         """
         Uses requests library to make Exlibris API Get call.

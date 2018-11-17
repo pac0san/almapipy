@@ -99,7 +99,7 @@ class SubClientUsers(Client):
                 e.g. data = {'first_name': 'Sterling', 'last_name': 'Archer'}
             raw (bool): If true, returns raw requests object.
 
-        Returns:
+        Returns: ¿?
             The user (at Alma) if a new user is created.
             Empty list if the 'identifier' was already set. 
 
@@ -111,9 +111,9 @@ class SubClientUsers(Client):
         url = self.cnxn_params['api_uri_full']
 
         # Search query for the 'identifier' in Alma
+        args['id_type'] = id_type
         query = {}
         query['identifier'] = identifier
-        args['id_type'] = id_type
         args['q'] = self.__format_query__(query)
 
         # Search for a user with this 'user_identifier'
@@ -121,15 +121,15 @@ class SubClientUsers(Client):
 
         if not response:
             # No user exists with this 'identifier': Let's create it.
-            user_data['identifier'] = identifier
-            args['q'] = self.__format_query__(user_data)
+            args.clear()
+            args['apikey'] = self.cnxn_params['api_key']
 
+            user_data['identifier'] = identifier
 # TODO: status, segment_type?
-            args['status'] = 'ACTIVE'
-            args['segment_type'] = 'External'
+            user_data['status'] = 'ACTIVE'
+            user_data['segment_type'] = 'External'
             
-# TODO: define 'self.write' in Client Class at client.py using 'request.post'
-            response = self.write(url, args, raw=raw)
+            response = self.create(url, user_data, args, raw=raw)
         
         return response
     
