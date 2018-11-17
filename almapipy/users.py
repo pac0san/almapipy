@@ -1,3 +1,5 @@
+#-*- coding: utf-8-unix -*-
+
 from .client import Client
 from . import utils
 
@@ -32,7 +34,7 @@ class SubClientUsers(Client):
         """Retrieve a user list or a single user.
 
         Args:
-            user_id (str): 	A unique identifier for the user.
+            user_id (str):      A unique identifier for the user.
                 Gets more detailed information.
             query (dict): Search query for filtering a user list. Optional.
                 Searching for words from fields: [primary_id, first_name,
@@ -90,16 +92,19 @@ class SubClientUsers(Client):
 
         Args:
             id_type (str): The identifier type for the user
-                Values: from the User Identifier Type code table.
+                Values: from the code-table: UserIdentifierTypes
+                See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
             identifier (str): The identifier itself for the user.
+                See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
             user_data (dict): Data for user enrollment.
                 Setting words for fields: [first_name, last_name,
-                middle_name, email, job_category, general_info].
+                middle_name, email, user_group, ...].
+                See <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user>
+                Values(user_group): code-table: UserGroups.
                 Format {'field': 'value', 'field2', 'value2'}.
-                e.g. data = {'first_name': 'Sterling', 'last_name': 'Archer'}
             raw (bool): If true, returns raw requests object.
 
-        Returns: ¿?
+        Returns: (?)
             The user (at Alma) if a new user is created.
             Empty list if the 'identifier' was already set. 
 
@@ -128,11 +133,11 @@ class SubClientUsers(Client):
 # TODO: status, segment_type?
             user_data['status'] = 'ACTIVE'
             user_data['segment_type'] = 'External'
-            
+
             response = self.create(url, user_data, args, raw=raw)
-        
+
         return response
-    
+
 
 class SubClientUsersLoans(Client):
     """Handles the Loans endpoints of Users API"""
@@ -147,8 +152,8 @@ class SubClientUsersLoans(Client):
         """Retrieve a list of loans for a user.
 
         Args:
-            user_id (str): 	A unique identifier for the user.
-            loan_id (str): 	A unique identifier for the loan.
+            user_id (str):      A unique identifier for the user.
+            loan_id (str):      A unique identifier for the loan.
             limit (int): Limits the number of results.
                 Valid values are 0-100.
             offset (int): The row number to start with.
@@ -203,8 +208,8 @@ class SubClientUsersRequests(Client):
         """Retrieve a list of requests for a user.
 
         Args:
-            user_id (str): 	A unique identifier for the user.
-            request_id (str): 	A unique identifier for the request.
+            user_id (str):      A unique identifier for the user.
+            request_id (str):   A unique identifier for the request.
             limit (int): Limits the number of results.
                 Valid values are 0-100.
             offset (int): The row number to start with.
@@ -258,8 +263,8 @@ class SubClientUsersFees(Client):
         """Retrieve a list of fines and fees for a user.
 
         Args:
-            user_id (str): 	A unique identifier for the user.
-            fee_id (str): 	A unique identifier for the fee.
+            user_id (str):      A unique identifier for the user.
+            fee_id (str):       A unique identifier for the fee.
             q_params (dict): Any additional query parameters.
             raw (bool): If true, returns raw requests object.
 
@@ -292,7 +297,7 @@ class SubClientUsersDeposits(Client):
         """Retrieve a list of deposits for a user.
 
         Args:
-            user_id (str): 	A unique identifier for the user.
+            user_id (str):      A unique identifier for the user.
             deposit_id (str): A unique identifier for the deposit.
             limit (int): Limits the number of results.
                 Valid values are 0-100.

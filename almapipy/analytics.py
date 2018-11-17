@@ -1,3 +1,5 @@
+#-*- coding: utf-8-unix -*-
+
 from .client import Client
 from . import utils
 import xml.etree.ElementTree as ET

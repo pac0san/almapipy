@@ -1,3 +1,5 @@
+#-*- coding: utf-8-unix -*-
+
 from .client import Client
 from . import utils
 
@@ -315,7 +317,7 @@ class SubClientConfigurationSets(Client):
             set_id (str): A unique identifier of the set.
             content_type (str): Content type for filtering.
                 Valid values are from the SetContentType code table.
-            set_type (str):	Set type for filtering.
+            set_type (str):     Set type for filtering.
                 Valid values are 'ITEMIZED' or 'LOGICAL'.
             query (dict): Search query. Searching for words in created_by or name
             limit (int): Limits the number of results.
