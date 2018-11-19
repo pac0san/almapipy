@@ -79,7 +79,12 @@ class SubClientUsers(Client):
         response = self.read(url, args, raw=raw)
         if user_id:
             return response
-
+        """
+        print("Debug: users.py GET")
+        print(url)
+        print(args)
+        print(response)
+        """
         # make multiple api calls until all records are retrieved
         if all_records:
             response = self.__read_all__(url=url, args=args, raw=raw,
@@ -93,48 +98,62 @@ class SubClientUsers(Client):
         Args:
             id_type (str): The identifier type for the user
                 Values: from the code-table: UserIdentifierTypes
+                <https://api-XX.hosted.exlibrisgroup.com/almaws/v1/conf/code-tables/UserIdentifierTypes?apikey=XXXXXXXXXX>
                 See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
             identifier (str): The identifier itself for the user.
                 See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
             user_data (dict): Data for user enrollment.
                 Setting words for fields: [first_name, last_name,
                 middle_name, email, user_group, ...].
-                See <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user>
-                Values(user_group): code-table: UserGroups.
                 Format {'field': 'value', 'field2', 'value2'}.
+                Values(user_group): code-table: UserGroups.
+                <https://api-XX.hosted.exlibrisgroup.com/almaws/v1/conf/code-tables/UserGroups?apikey=XXXXXXXXXX>
+                See <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user>
             raw (bool): If true, returns raw requests object.
 
         Returns: (?)
             The user (at Alma) if a new user is created.
-            Empty list if the 'identifier' was already set. 
+            "{'total_record_count': 0}" if the 'identifier' was already set. 
 
         """
 
         args = {}
+        args['id_type'] = id_type
         args['apikey'] = self.cnxn_params['api_key']
 
         url = self.cnxn_params['api_uri_full']
 
         # Search query for the 'identifier' in Alma
-        args['id_type'] = id_type
         query = {}
-        query['identifier'] = identifier
+        query['identifiers'] = identifier
         args['q'] = self.__format_query__(query)
 
         # Search for a user with this 'user_identifier'
         response = self.read(url, args, raw=raw)
-
-        if not response:
+        """        
+        print("Debug: users.py POST")
+        print(url)
+        print(args)
+        print(response)
+        """
+        if response['total_record_count'] == 0:
             # No user exists with this 'identifier': Let's create it.
             args.clear()
             args['apikey'] = self.cnxn_params['api_key']
 
-            user_data['identifier'] = identifier
-# TODO: status, segment_type?
-            user_data['status'] = 'ACTIVE'
-            user_data['segment_type'] = 'External'
+            # 'user_identifier' chunk
+            aux_dict = {}
+            aux_dict['value'] = identifier
+            aux_dict['id_type'] = {} 
+            aux_dict['id_type']['value'] = id_type
+            aux_dict['status'] = 'ACTIVE'
+            aux_dict['segment_type'] = 'External'
+            user_data['user_identifier'] = [ aux_dict ]
 
             response = self.create(url, user_data, args, raw=raw)
+        else:
+            # User already exist in Alma.
+            response = {'total_record_count': 0}
 
         return response
 

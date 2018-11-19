@@ -21,7 +21,8 @@ class Client(object):
         # instantiate dictionary for storing alma api connection parameters
         self.cnxn_params = cnxn_params
 
-    def create(self, url, data, args, object_type, raw=False):
+#    def create(self, url, data, args, object_type, raw=False):
+    def create(self, url, data, args, raw=False):
         """
         Uses requests library to make Exlibris API Post call.
 
@@ -29,13 +30,12 @@ class Client(object):
             url (str): Exlibris API endpoint url.
             data (dict): Data to be posted.
             args (dict): Query string parameters for API call.
-            object_type (str): Type of object to be posted (see alma docs)
+#            object_type (str): Type of object to be posted (see alma docs)
             raw (bool): If true, returns raw response.
 
         Returns:
             JSON-esque, xml, or raw response.
         """
-#        print(url)
 
         # Determine format of data to be posted according to order of importance:
         # 1) Local declaration, 2) dtype of data parameter, 3) global setting.
@@ -66,7 +66,13 @@ class Client(object):
         else:
             message = "Post content type must be either 'json' or 'xml'"
             raise utils.ArgError(message)
-
+        """
+        print("Debug: client.py Create")
+        print(url)
+        print(data)
+        print(args)
+        print(headers)
+        """
         # Send request and parse response
         response = requests.post(url, data=data, params=args, headers=headers)
         if raw:
