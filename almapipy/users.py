@@ -2,7 +2,7 @@
 
 from .client import Client
 from . import utils
-
+from json import loads
 
 class SubClientUsers(Client):
     """
@@ -142,6 +142,8 @@ class SubClientUsers(Client):
             args['apikey'] = self.cnxn_params['api_key']
 
             # 'user_identifier' chunk
+
+            """
             aux_dict = {}
             aux_dict['value'] = identifier
             aux_dict['id_type'] = {} 
@@ -149,6 +151,10 @@ class SubClientUsers(Client):
             aux_dict['status'] = 'ACTIVE'
             aux_dict['segment_type'] = 'External'
             user_data['user_identifier'] = [ aux_dict ]
+            """
+
+            aux_dict = "{ 'user_identifier': [{ 'value': '" + identifier  + "', 'id_type': { 'value': '" + id_type + "' }, 'status': 'ACTIVE', 'segment_type': 'External' }] }"
+            user_data = loads(aux_dict.replace("'", "\""))
 
             response = self.create(url, user_data, args, raw=raw)
         else:
