@@ -25,6 +25,7 @@ class Client(object):
     def create(self, url, data, args, raw=False):
         """
         Uses requests library to make Exlibris API Post call.
+        Returns data of type specified during init of base class.
 
         Args:
             url (str): Exlibris API endpoint url.
@@ -73,14 +74,40 @@ class Client(object):
         print(args)
         print(headers)
         """
-        # Send request and parse response
+        # Send request
         response = requests.post(url, data=data, params=args, headers=headers)
         if raw:
             return response
+
+        # Parse content
         content = self.__parse_response__(response)
 
         return content
 
+    def delete(self, url, data, args, raw=False):
+        """
+        Uses requests library to make Exlibris API Delete call.
+        Returns data of type specified during init of base class.
+
+        Args:
+            url (str): Exlibris API endpoint url.
+            data (dict): Data to be deleted..
+            args (dict): Query string parameters for API call.
+            raw (bool): If true, returns raw response.
+
+        Returns:
+            JSON-esque, xml, or raw response.
+        """
+
+        # Send request
+        response = requests.delete(url, headers=args)
+        if raw:
+            return response
+
+        # Parse content
+        content = self.__parse_response__(response)
+
+        return content
 
     def read(self, url, args, raw=False):
         """
