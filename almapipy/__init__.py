@@ -4,7 +4,9 @@
 Python client for Ex Libris Alma
 """
 __author__ = "Steve Pelkey (spelkey@ucdavis.edu)"
-__version__ = "0.0.9"
+__name__ = "almapipy"
+__version__ = "1.0.1"
+
 
 import os
 
@@ -67,6 +69,8 @@ class AlmaCnxn(Client):
         # TODO: validate api key. return list of accessible endpoints
         # call __validate_key__
         self.cnxn_params['api_key'] = apikey
+
+        self.cnxn_params['User-Agent'] = '{}/{}'.format(__name__,__version__)
 
         # Hook in the various Alma APIs based on what API key can access
         self.bibs = SubClientBibs(self.cnxn_params)

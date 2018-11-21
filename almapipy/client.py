@@ -52,8 +52,8 @@ class Client(object):
         else:
             content_type = args['format']
 
-        # Preserve Auth, declare data type in header, convert to string if necessary.
-        headers_aux = headers.copy()
+        # Preserve User-Agent, Auth, declare data type in header, convert to string if necessary.
+        headers_aux = dict({'User-Agent': '{}'.format(self.cnxn_params['User-Agent'])}, **headers)
         if content_type == 'json':
             headers_aux['content-type'] = 'application/json'
             if type(data) != str:
@@ -100,8 +100,16 @@ class Client(object):
             JSON-esque, xml, or raw response.
         """
 
+        # Preserve User-Agent and Auth in headers
+        headers_aux = dict({'User-Agent': '{}'.format(self.cnxn_params['User-Agent'])}, **headers)
+        """
+        print("Debug: client.py delete")
+        print(url)
+        print(args)
+        print(headers_aux)
+        """
         # Send request
-        response = requests.delete(url, params=args, headers=headers)
+        response = requests.delete(url, params=args, headers=headers_aux)
         if raw:
             return response
 
@@ -132,8 +140,16 @@ class Client(object):
             args['format'] = data_format
         data_format = args['format']
 
+        # Preserve User-Agent and Auth in headers
+        headers_aux = dict({'User-Agent': '{}'.format(self.cnxn_params['User-Agent'])}, **headers)
+        """
+        print("Debug: client.py read")
+        print(url)
+        print(args)
+        print(headers_aux)
+        """
         # Send request.
-        response = requests.get(url, params=args, headers=headers)
+        response = requests.get(url, params=args, headers=headers_aux)
         if raw:
             return response
 
@@ -205,12 +221,15 @@ class Client(object):
         args['limit'] = max_limit
         limit = max_limit
 
+        # Preserve User-Agent and Auth in headers
+        headers_aux = dict(__headers__, headers)
+
         while True:
             if total_records <= records_retrieved:
                 break
 
             # make call and increment counter variables
-            new_response = self.read(url, args=args, headers=headers, raw=raw)
+            new_response = self.read(url, args=args, headers=headers_aux, raw=raw)
             records_retrieved += limit
             args['offset'] += limit
 
