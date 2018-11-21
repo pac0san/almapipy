@@ -22,7 +22,7 @@ class Client(object):
         self.cnxn_params = cnxn_params
 
 #    def create(self, url, data, args, object_type, raw=False):
-    def create(self, url, data, args, raw=False):
+    def create(self, url, data, args, headers, raw=False):
         """
         Uses requests library to make Exlibris API Post call.
         Returns data of type specified during init of base class.
@@ -31,6 +31,7 @@ class Client(object):
             url (str): Exlibris API endpoint url.
             data (dict): Data to be posted.
             args (dict): Query string parameters for API call.
+            headers (dict): API Key Auth in Headers.
 #            object_type (str): Type of object to be posted (see alma docs)
             raw (bool): If true, returns raw response.
 
@@ -40,7 +41,6 @@ class Client(object):
 
         # Determine format of data to be posted according to order of importance:
         # 1) Local declaration, 2) dtype of data parameter, 3) global setting.
-        headers = {}
         if 'format' not in args.keys():
             if type(data) == ET or type(data) == ET.Element:
                 content_type = 'xml'
@@ -52,13 +52,14 @@ class Client(object):
         else:
             content_type = args['format']
 
-        # Declare data type in header, convert to string if necessary.
+        # Preserve Auth, declare data type in header, convert to string if necessary.
+        headers_aux = headers.copy()
         if content_type == 'json':
-            headers['content-type'] = 'application/json'
+            headers_aux['content-type'] = 'application/json'
             if type(data) != str:
                 data = json.dumps(data)
         elif content_type == 'xml':
-            headers['content-type'] = 'application/xml'
+            headers_aux['content-type'] = 'application/xml'
             if type(data) == ET or type(data) == ET.Element:
                 data = ET.tostring(data, encoding='unicode')
             elif type(data) != str:
@@ -72,10 +73,10 @@ class Client(object):
         print(url)
         print(data)
         print(args)
-        print(headers)
+        print(headers_aux)
         """
         # Send request
-        response = requests.post(url, data=data, params=args, headers=headers)
+        response = requests.post(url, data=data, params=args, headers=headers_aux)
         if raw:
             return response
 
@@ -84,15 +85,15 @@ class Client(object):
 
         return content
 
-    def delete(self, url, data, args, raw=False):
+    def delete(self, url, args, headers, raw=False):
         """
         Uses requests library to make Exlibris API Delete call.
         Returns data of type specified during init of base class.
 
         Args:
             url (str): Exlibris API endpoint url.
-            data (dict): Data to be deleted..
             args (dict): Query string parameters for API call.
+            headers (dict): API Key Auth in Headers.
             raw (bool): If true, returns raw response.
 
         Returns:
@@ -100,7 +101,7 @@ class Client(object):
         """
 
         # Send request
-        response = requests.delete(url, headers=args)
+        response = requests.delete(url, params=args, headers=headers)
         if raw:
             return response
 
@@ -109,7 +110,7 @@ class Client(object):
 
         return content
 
-    def read(self, url, args, raw=False):
+    def read(self, url, args, headers, raw=False):
         """
         Uses requests library to make Exlibris API Get call.
         Returns data of type specified during init of base class.
@@ -117,6 +118,7 @@ class Client(object):
         Args:
             url (str): Exlibris API endpoint url.
             args (dict): Query string parameters for API call.
+            headers (dict): API Key Auth in Headers.
             raw (bool): If true, returns raw response.
 
         Returns:
@@ -131,7 +133,7 @@ class Client(object):
         data_format = args['format']
 
         # Send request.
-        response = requests.get(url, params=args)
+        response = requests.get(url, params=args, headers=headers)
         if raw:
             return response
 
@@ -165,13 +167,14 @@ class Client(object):
 
         return q_str
 
-    def __read_all__(self, url, args, raw, response, data_key, max_limit=100):
+    def __read_all__(self, url, args, headers, raw, response, data_key, max_limit=100):
         """Makes multiple API calls until all records for a query are retrieved.
             Called by the 'all_records' parameter.
 
         Args:
             url (str): Exlibris API endpoint url.
             args (dict): Query string parameters for API call.
+            headers (dict): API Key Auth in Headers.
             raw (bool): If true, returns raw response.
             response (xml, raw, or json): First API call.
             data_key (str): Dictionary key for accessing data.
@@ -207,7 +210,7 @@ class Client(object):
                 break
 
             # make call and increment counter variables
-            new_response = self.read(url, args, raw=raw)
+            new_response = self.read(url, args=args, headers=headers, raw=raw)
             records_retrieved += limit
             args['offset'] += limit
 

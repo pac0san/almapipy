@@ -55,8 +55,10 @@ class SubClientUsers(Client):
             List of user or a specific user's details.
 
         """
+
+        headers = {'Authorization': 'apikey {}'.format(self.cnxn_params['api_key'])}
+
         args = q_params.copy()
-        args['apikey'] = self.cnxn_params['api_key']
 
         url = self.cnxn_params['api_uri_full']
         if user_id:
@@ -76,7 +78,7 @@ class SubClientUsers(Client):
             if query:
                 args['q'] = self.__format_query__(query)
 
-        response = self.read(url, args, raw=raw)
+        response = self.read(url, args=args, headers=headers, raw=raw)
         if user_id:
             return response
         """
@@ -87,12 +89,12 @@ class SubClientUsers(Client):
         """
         # make multiple api calls until all records are retrieved
         if all_records:
-            response = self.__read_all__(url=url, args=args, raw=raw,
+            response = self.__read_all__(url=url, args=args, headers=headers, raw=raw,
                                          response=response, data_key='user')
         return response
 
 
-    def post(self, identifier, id_type, user_data={}, raw=False):
+    def post(self, identifier, id_type, user_data, raw=False):
         """Create a single user if it does not exists yet in Alma
 
         Args:
@@ -117,19 +119,18 @@ class SubClientUsers(Client):
 
         """
 
-        args = {}
-        args['id_type'] = id_type
-        args['apikey'] = self.cnxn_params['api_key']
+        headers = {'Authorization': 'apikey {}'.format(self.cnxn_params['api_key'])}
+
+        args = {'id_type': '{}'.format(id_type)}
 
         url = self.cnxn_params['api_uri_full']
 
         # Search query for the 'identifier' in Alma
-        query = {}
-        query['identifiers'] = identifier
+        query = {'identifiers': '{}'.format(identifier)}
         args['q'] = self.__format_query__(query)
 
         # Search for a user with this 'user_identifier'
-        response = self.read(url, args, raw=raw)
+        response = self.read(url, args=args, headers=headers, raw=raw)
         """        
         print("Debug: users.py POST")
         print(url)
@@ -138,11 +139,8 @@ class SubClientUsers(Client):
         """
         if response['total_record_count'] == 0:
             # No user exists with this 'identifier': Let's create it.
-            args.clear()
-            args['apikey'] = self.cnxn_params['api_key']
 
             # 'user_identifier' chunk
-
             """
             aux_dict = {}
             aux_dict['value'] = identifier
@@ -152,11 +150,10 @@ class SubClientUsers(Client):
             aux_dict['segment_type'] = 'External'
             user_data['user_identifier'] = [ aux_dict ]
             """
-
             aux_dict = "{ 'user_identifier': [{ 'value': '" + identifier  + "', 'id_type': { 'value': '" + id_type + "' }, 'status': 'ACTIVE', 'segment_type': 'External' }] }"
             user_data = loads(aux_dict.replace("'", "\""))
 
-            response = self.create(url, user_data, args, raw=raw)
+            response = self.create(url, data=user_data, args=args, headers=headers, raw=raw)
         else:
             # User already exist in Alma.
             response = {'total_record_count': 0}
@@ -191,8 +188,10 @@ class SubClientUsersLoans(Client):
             List of loans or a specific loan for a given user.
 
         """
+
+        headers = {'Authorization': 'apikey {}'.format(self.cnxn_params['api_key'])}
+
         args = q_params.copy()
-        args['apikey'] = self.cnxn_params['api_key']
 
         url = self.cnxn_params['api_uri_full']
         url += (str(user_id) + "/loans")
@@ -209,13 +208,13 @@ class SubClientUsersLoans(Client):
             args['limit'] = limit
             args['offset'] = int(offset)
 
-        response = self.read(url, args, raw=raw)
+        response = self.read(url, args=args, headers=headers, raw=raw)
         if loan_id:
             return response
 
         # make multiple api calls until all records are retrieved
         if all_records:
-            response = self.__read_all__(url=url, args=args, raw=raw,
+            response = self.__read_all__(url=url, args=args, headers=headers, raw=raw,
                                          response=response, data_key='item_loan')
         return response
 
