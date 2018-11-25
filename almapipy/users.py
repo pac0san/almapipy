@@ -29,12 +29,10 @@ class SubClientUsers(Client):
         self.fees = SubClientUsersFees(self.cnxn_params)
         self.deposits = SubClientUsersDeposits(self.cnxn_params)
 
-    def get(self, user_id=None, query={}, limit=10, offset=0,
-            all_records=False, q_params={}, raw=False):
+    def retrieve(self, user_id=None, query={}, limit=10, offset=0, all_records=False, q_params={}, raw=False):
         """Retrieve a user list or a single user.
 
-        Args:
-            user_id (str):      A unique identifier for the user.
+        Args:            user_id (str):      A unique identifier for the user.
                 Gets more detailed information.
             query (dict): Search query for filtering a user list. Optional.
                 Searching for words from fields: [primary_id, first_name,
@@ -60,6 +58,17 @@ class SubClientUsers(Client):
 
         args = q_params.copy()
 
+        print("\nDebug: users.py Retrieve #1")
+        print(query)
+        print(args)
+        print("")
+
+        # Avoid sending 'primary_id' as 'id_type'
+        if ('id_type' in args.keys()) and (args['id_type'] == 'primary_id'):
+            args.pop('id_type', None)
+            args['primary_id'] = args.pop('identifiers', None)
+        print(args)
+
         url = self.cnxn_params['api_uri_full']
         if user_id:
             url += ("/" + str(user_id))
@@ -78,24 +87,25 @@ class SubClientUsers(Client):
             if query:
                 args['q'] = self.__format_query__(query)
 
-        response = self.read(url, args=args, headers=headers, raw=raw)
+        response = self.get(url, args=args, headers=headers, raw=raw)
         if user_id:
             return response
-        """
-        print("Debug: users.py GET")
+
+        print("\nDebug: users.py Retrieve #2")
         print(url)
         print(args)
+        print(headers)
         print(response)
-        """
+        print("")
+
         # make multiple api calls until all records are retrieved
         if all_records:
             response = self.__read_all__(url=url, args=args, headers=headers, raw=raw,
                                          response=response, data_key='user')
         return response
 
-
-    def post(self, identifier, id_type, user_data, raw=False):
-        """Create a single user if it does not exists yet in Alma
+    def create(self, identifier, id_type, user_data, raw=False):
+        """Create a single user if it does not exist yet in Alma
 
         Args:
             id_type (str): The identifier type for the user
@@ -120,23 +130,34 @@ class SubClientUsers(Client):
         """
 
         headers = {'Authorization': 'apikey {}'.format(self.cnxn_params['api_key'])}
+        
+        data=user_data.copy()
+        
+        # Avoid sending 'primary_id' as 'id_type'
+        args = {}
+        query = {}
+        if id_type != 'primary_id':
+            args['id_type'] = id_type
+            query = {'identifiers': '{}'.format(identifier)}
+# TODO: add 'user_identifier' stuff into 'user_data'
+        else:
+            query = {'primary_id': '{}'.format(identifier)}
+            data['primary_id'] = identifier
 
-        args = {'id_type': '{}'.format(id_type)}
-
+        args['q'] = self.__format_query__(query)
+        
         url = self.cnxn_params['api_uri_full']
 
-        # Search query for the 'identifier' in Alma
-        query = {'identifiers': '{}'.format(identifier)}
-        args['q'] = self.__format_query__(query)
-
         # Search for a user with this 'user_identifier'
-        response = self.read(url, args=args, headers=headers, raw=raw)
-        """        
-        print("Debug: users.py POST")
+        response = self.get(url, args=args, headers=headers, raw=raw)
+
+        print("\nDebug: users.py Create #1")
+        print(headers)
         print(url)
         print(args)
         print(response)
-        """
+        print("")
+
         if response['total_record_count'] == 0:
             # No user exists with this 'identifier': Let's create it.
 
@@ -148,15 +169,94 @@ class SubClientUsers(Client):
             aux_dict['id_type']['value'] = id_type
             aux_dict['status'] = 'ACTIVE'
             aux_dict['segment_type'] = 'External'
-            user_data['user_identifier'] = [ aux_dict ]
+            data['user_identifier'] = [ aux_dict ]
             """
-            aux_dict = "{ 'user_identifier': [{ 'value': '" + identifier  + "', 'id_type': { 'value': '" + id_type + "' }, 'status': 'ACTIVE', 'segment_type': 'External' }] }"
-            user_data = loads(aux_dict.replace("'", "\""))
+#            aux_dict = "{ 'user_identifier': [{ 'value': '" + identifier  + "', 'id_type': { 'value': '" + id_type + "' }, 'status': 'ACTIVE', 'segment_type': 'External' }] }"
+#            data = loads(aux_dict.replace("'", "\""))
 
-            response = self.create(url, data=user_data, args=args, headers=headers, raw=raw)
+            args.pop('q', None)
+
+            print("\nDebug: users.py Create #2")
+            print(headers)
+            print(url)
+            print(args)
+            print(data)
+
+            response = self.post(url, data=data, args=args, headers=headers, raw=raw)
+
+            print(response)
+            print("")
+
         else:
             # User already exist in Alma.
             response = {'total_record_count': 0}
+
+        return response
+
+    def remove(self, identifier, id_type, raw=False):
+        """Remove a single user if it does exist in Alma
+
+        Args:
+            id_type (str): The identifier type for the user
+                Values: from the code-table: UserIdentifierTypes
+                <https://api-XX.hosted.exlibrisgroup.com/almaws/v1/conf/code-tables/UserIdentifierTypes?apikey=XXXXXXXXXX>
+                See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
+            identifier (str): The identifier itself for the user.
+                See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
+            raw (bool): If true, returns raw requests object.
+
+        Returns: (?)
+            The user (at Alma) if a new user is removed.
+            "{'total_record_count': 0}" if the 'identifier' is not present in Alma. 
+
+        """
+
+        headers = {'Authorization': 'apikey {}'.format(self.cnxn_params['api_key'])}
+        
+        # Avoid sending 'primary_id' as 'id_type'
+        args = {}
+        query = {}
+        if id_type != 'primary_id':
+            args['id_type'] = id_type
+            query = {'identifiers': '{}'.format(identifier)}
+# TODO: add 'user_identifier' stuff into 'user_data'
+        else:
+            query = {'primary_id': '{}'.format(identifier)}
+
+        args['q'] = self.__format_query__(query)
+        
+        url = self.cnxn_params['api_uri_full']
+
+        # Search for a user with this 'user_identifier'
+        response = self.get(url, args=args, headers=headers, raw=raw)
+
+        print("\nDebug: users.py Delete #1")
+        print(headers)
+        print(url)
+        print(args)
+        print(response)
+        print("")
+
+        if response['total_record_count'] == 1:
+            # A single user exists with this 'identifier': Let's remove it.
+            args.clear()
+            args['primary_id'] = response['user'][0]['primary_id']
+            url += (str('/' + args['primary_id']))
+
+            print("\nDebug: users.py Delete #2")
+            print(headers)
+            print(url)
+            print(args)
+
+            # Send request
+            response = self.delete(url, args=args, headers=headers, raw=raw)
+
+            print(response)
+            print("")
+
+        else:
+            # No a "single" user exists in Alma.
+            response = response['total_record_count']
 
         return response
 
@@ -169,7 +269,7 @@ class SubClientUsersLoans(Client):
         self.cnxn_params['api_uri'] += '/'
         self.cnxn_params['api_uri_full'] += '/'
 
-    def get(self, user_id, loan_id=None, limit=10, offset=0,
+    def retrieve(self, user_id, loan_id=None, limit=10, offset=0,
             all_records=False, q_params={}, raw=False):
         """Retrieve a list of loans for a user.
 
@@ -208,13 +308,13 @@ class SubClientUsersLoans(Client):
             args['limit'] = limit
             args['offset'] = int(offset)
 
-        response = self.read(url, args=args, headers=headers, raw=raw)
+        response = self.get(url, args=args, headers=headers, raw=raw)
         if loan_id:
             return response
 
         # make multiple api calls until all records are retrieved
         if all_records:
-            response = self.__read_all__(url=url, args=args, headers=headers, raw=raw,
+            response = self.__get_all__(url=url, args=args, headers=headers, raw=raw,
                                          response=response, data_key='item_loan')
         return response
 
@@ -227,7 +327,7 @@ class SubClientUsersRequests(Client):
         self.cnxn_params['api_uri'] += '/'
         self.cnxn_params['api_uri_full'] += '/'
 
-    def get(self, user_id, request_id=None, limit=10, offset=0,
+    def retrieve(self, user_id, request_id=None, limit=10, offset=0,
             all_records=False, q_params={}, raw=False):
         """Retrieve a list of requests for a user.
 
@@ -264,13 +364,13 @@ class SubClientUsersRequests(Client):
             args['limit'] = limit
             args['offset'] = int(offset)
 
-        response = self.read(url, args, raw=raw)
+        response = self.get(url, args, raw=raw)
         if request_id:
             return response
 
         # make multiple api calls until all records are retrieved
         if all_records:
-            response = self.__read_all__(url=url, args=args, raw=raw,
+            response = self.__get_all__(url=url, args=args, raw=raw,
                                          response=response, data_key='user_request')
         return response
 
@@ -283,7 +383,7 @@ class SubClientUsersFees(Client):
         self.cnxn_params['api_uri'] += '/'
         self.cnxn_params['api_uri_full'] += '/'
 
-    def get(self, user_id, fee_id=None, q_params={}, raw=False):
+    def retrieve(self, user_id, fee_id=None, q_params={}, raw=False):
         """Retrieve a list of fines and fees for a user.
 
         Args:
@@ -305,7 +405,7 @@ class SubClientUsersFees(Client):
         args = q_params.copy()
         args['apikey'] = self.cnxn_params['api_key']
 
-        return self.read(url, args, raw=raw)
+        return self.get(url, args, raw=raw)
 
 
 class SubClientUsersDeposits(Client):
@@ -316,7 +416,7 @@ class SubClientUsersDeposits(Client):
         self.cnxn_params['api_uri'] += '/'
         self.cnxn_params['api_uri_full'] += '/'
 
-    def get(self, user_id, deposit_id=None, limit=10, offset=0,
+    def retrieve(self, user_id, deposit_id=None, limit=10, offset=0,
             all_records=False, q_params={}, raw=False):
         """Retrieve a list of deposits for a user.
 
@@ -353,12 +453,12 @@ class SubClientUsersDeposits(Client):
             args['limit'] = limit
             args['offset'] = int(offset)
 
-        response = self.read(url, args, raw=raw)
+        response = self.get(url, args, raw=raw)
         if deposit_id:
             return response
 
         # make multiple api calls until all records are retrieved
         if all_records:
-            response = self.__read_all__(url=url, args=args, raw=raw,
-                                         response=response, data_key='user_deposit')
+            response = self.__get_all__(url=url, args=args, raw=raw,
+                                        response=response, data_key='user_deposit')
         return response

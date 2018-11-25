@@ -21,8 +21,8 @@ class Client(object):
         # instantiate dictionary for storing alma api connection parameters
         self.cnxn_params = cnxn_params
 
-#    def create(self, url, data, args, object_type, raw=False):
-    def create(self, url, data, args, headers, raw=False):
+#    def post(self, url, data, args, object_type, raw=False):
+    def post(self, url, data, args, headers, raw=False):
         """
         Uses requests library to make Exlibris API Post call.
         Returns data of type specified during init of base class.
@@ -52,8 +52,9 @@ class Client(object):
         else:
             content_type = args['format']
 
-        # Preserve User-Agent, Auth, declare data type in header, convert to string if necessary.
-        headers_aux = dict({'User-Agent': '{}'.format(self.cnxn_params['User-Agent'])}, **headers)
+        # Preserve Auth and add 'User-Agent' and 'content-type' in headers
+        headers_aux = headers.copy()
+        headers_aux['User-Agent'] = self.cnxn_params['User-Agent']
         if content_type == 'json':
             headers_aux['content-type'] = 'application/json'
             if type(data) != str:
@@ -69,7 +70,7 @@ class Client(object):
             message = "Post content type must be either 'json' or 'xml'"
             raise utils.ArgError(message)
         """
-        print("Debug: client.py Create")
+        print("\nDebug: client.py Post #1")
         print(url)
         print(data)
         print(args)
@@ -100,16 +101,22 @@ class Client(object):
             JSON-esque, xml, or raw response.
         """
 
-        # Preserve User-Agent and Auth in headers
-        headers_aux = dict({'User-Agent': '{}'.format(self.cnxn_params['User-Agent'])}, **headers)
-        """
-        print("Debug: client.py delete")
+        # Preserve Auth and add 'User-Agent' in headers
+        headers_aux = headers.copy()
+        headers_aux['User-Agent'] = self.cnxn_params['User-Agent']
+
+        print("\nDebug: client.py Delete #1")
         print(url)
         print(args)
         print(headers_aux)
-        """
+        print("")
+
         # Send request
         response = requests.delete(url, params=args, headers=headers_aux)
+
+        print(response)
+        print("")
+
         if raw:
             return response
 
@@ -118,7 +125,7 @@ class Client(object):
 
         return content
 
-    def read(self, url, args, headers, raw=False):
+    def get(self, url, args, headers, raw=False):
         """
         Uses requests library to make Exlibris API Get call.
         Returns data of type specified during init of base class.
@@ -140,10 +147,11 @@ class Client(object):
             args['format'] = data_format
         data_format = args['format']
 
-        # Preserve User-Agent and Auth in headers
-        headers_aux = dict({'User-Agent': '{}'.format(self.cnxn_params['User-Agent'])}, **headers)
+        # Preserve Auth and add 'User-Agent' in headers
+        headers_aux = headers.copy()
+        headers_aux['User-Agent'] = self.cnxn_params['User-Agent']
         """
-        print("Debug: client.py read")
+        print("\nDebug: client.py Get #1")
         print(url)
         print(args)
         print(headers_aux)
@@ -183,7 +191,7 @@ class Client(object):
 
         return q_str
 
-    def __read_all__(self, url, args, headers, raw, response, data_key, max_limit=100):
+    def __get_all__(self, url, args, headers, raw, response, data_key, max_limit=100):
         """Makes multiple API calls until all records for a query are retrieved.
             Called by the 'all_records' parameter.
 
@@ -221,15 +229,16 @@ class Client(object):
         args['limit'] = max_limit
         limit = max_limit
 
-        # Preserve User-Agent and Auth in headers
-        headers_aux = dict(__headers__, headers)
+        # Preserve Auth and add 'User-Agent' in headers
+        headers_aux = headers.copy()
+        headers_aux['User-Agent'] = self.cnxn_params['User-Agent']
 
         while True:
             if total_records <= records_retrieved:
                 break
 
             # make call and increment counter variables
-            new_response = self.read(url, args=args, headers=headers_aux, raw=raw)
+            new_response = self.get(url, args=args, headers=headers_aux, raw=raw)
             records_retrieved += limit
             args['offset'] += limit
 
