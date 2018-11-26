@@ -32,7 +32,8 @@ class SubClientUsers(Client):
     def retrieve(self, user_id=None, query={}, limit=10, offset=0, all_records=False, q_params={}, raw=False):
         """Retrieve a user list or a single user.
 
-        Args:            user_id (str):      A unique identifier for the user.
+        Args:
+            user_id (str): A unique identifier for the user.
                 Gets more detailed information.
             query (dict): Search query for filtering a user list. Optional.
                 Searching for words from fields: [primary_id, first_name,
@@ -57,18 +58,18 @@ class SubClientUsers(Client):
         headers = {'Authorization': 'apikey {}'.format(self.cnxn_params['api_key'])}
 
         args = q_params.copy()
-
+        """
         print("\nDebug: users.py Retrieve #1")
         print(query)
         print(args)
         print("")
-
+        """
+        """
         # Avoid sending 'primary_id' as 'id_type'
         if ('id_type' in args.keys()) and (args['id_type'] == 'primary_id'):
             args.pop('id_type', None)
             args['primary_id'] = args.pop('identifiers', None)
-        print(args)
-
+        """ 
         url = self.cnxn_params['api_uri_full']
         if user_id:
             url += ("/" + str(user_id))
@@ -90,14 +91,14 @@ class SubClientUsers(Client):
         response = self.get(url, args=args, headers=headers, raw=raw)
         if user_id:
             return response
-
+        """
         print("\nDebug: users.py Retrieve #2")
         print(url)
         print(args)
         print(headers)
         print(response)
         print("")
-
+        """
         # make multiple api calls until all records are retrieved
         if all_records:
             response = self.__read_all__(url=url, args=args, headers=headers, raw=raw,
@@ -108,11 +109,11 @@ class SubClientUsers(Client):
         """Create a single user if it does not exist yet in Alma
 
         Args:
+            identifier (str): The identifier itself for the user.
+                See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
             id_type (str): The identifier type for the user
                 Values: from the code-table: UserIdentifierTypes
                 <https://api-XX.hosted.exlibrisgroup.com/almaws/v1/conf/code-tables/UserIdentifierTypes?apikey=XXXXXXXXXX>
-                See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
-            identifier (str): The identifier itself for the user.
                 See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
             user_data (dict): Data for user enrollment.
                 Setting words for fields: [first_name, last_name,
@@ -150,14 +151,14 @@ class SubClientUsers(Client):
 
         # Search for a user with this 'user_identifier'
         response = self.get(url, args=args, headers=headers, raw=raw)
-
+        """
         print("\nDebug: users.py Create #1")
         print(headers)
         print(url)
         print(args)
         print(response)
         print("")
-
+        """
         if response['total_record_count'] == 0:
             # No user exists with this 'identifier': Let's create it.
 
@@ -171,43 +172,44 @@ class SubClientUsers(Client):
             aux_dict['segment_type'] = 'External'
             data['user_identifier'] = [ aux_dict ]
             """
-#            aux_dict = "{ 'user_identifier': [{ 'value': '" + identifier  + "', 'id_type': { 'value': '" + id_type + "' }, 'status': 'ACTIVE', 'segment_type': 'External' }] }"
-#            data = loads(aux_dict.replace("'", "\""))
-
+            """
+            aux_dict = "{ 'user_identifier': [{ 'value': '" + identifier  + "', 'id_type': { 'value': '" + id_type + "' }, 'status': 'ACTIVE', 'segment_type': 'External' }] }"
+            data = loads(aux_dict.replace("'", "\""))
+            """
             args.pop('q', None)
-
+            """
             print("\nDebug: users.py Create #2")
             print(headers)
             print(url)
             print(args)
             print(data)
-
+            """
             response = self.post(url, data=data, args=args, headers=headers, raw=raw)
-
+            """
             print(response)
             print("")
-
+            """
         else:
             # User already exist in Alma.
             response = {'total_record_count': 0}
 
         return response
-
+    
     def remove(self, identifier, id_type, raw=False):
         """Remove a single user if it does exist in Alma
 
         Args:
+            identifier (str): The identifier itself for the user.
+                See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
             id_type (str): The identifier type for the user
                 Values: from the code-table: UserIdentifierTypes
                 <https://api-XX.hosted.exlibrisgroup.com/almaws/v1/conf/code-tables/UserIdentifierTypes?apikey=XXXXXXXXXX>
                 See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
-            identifier (str): The identifier itself for the user.
-                See: <https://developers.exlibrisgroup.com/alma/apis/xsd/rest_user.xsd#user_identifiers>
             raw (bool): If true, returns raw requests object.
 
         Returns: (?)
-            The user (at Alma) if a new user is removed.
-            "{'total_record_count': 0}" if the 'identifier' is not present in Alma. 
+            "{'total_record_count': 1}" if the user has been successfully removed.
+            "{'total_record_count': 0}" if the 'identifier' was not present in Alma.
 
         """
 
@@ -229,34 +231,31 @@ class SubClientUsers(Client):
 
         # Search for a user with this 'user_identifier'
         response = self.get(url, args=args, headers=headers, raw=raw)
-
+        """
         print("\nDebug: users.py Delete #1")
         print(headers)
         print(url)
         print(args)
         print(response)
         print("")
-
+        """
         if response['total_record_count'] == 1:
             # A single user exists with this 'identifier': Let's remove it.
             args.clear()
             args['primary_id'] = response['user'][0]['primary_id']
             url += (str('/' + args['primary_id']))
-
+            """
             print("\nDebug: users.py Delete #2")
             print(headers)
             print(url)
             print(args)
-
+            """
             # Send request
             response = self.delete(url, args=args, headers=headers, raw=raw)
-
+            """
             print(response)
             print("")
-
-        else:
-            # No a "single" user exists in Alma.
-            response = response['total_record_count']
+            """
 
         return response
 

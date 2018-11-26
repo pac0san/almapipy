@@ -5,7 +5,7 @@ Python client for Ex Libris Alma
 """
 __author__ = "Steve Pelkey (spelkey@ucdavis.edu)"
 __name__ = "almapipy"
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 
 
 import os

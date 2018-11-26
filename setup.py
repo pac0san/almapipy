@@ -6,7 +6,7 @@ from setuptools import find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-VERSION = "1.0.1"
+VERSION = "1.1.0"
 
 setup(
     name="almapipy",

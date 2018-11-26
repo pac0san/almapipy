@@ -1,3 +1,5 @@
+#-*- coding: utf-8-unix -*-
+
 # almapipy: Python Wrapper for Alma API
 
 almapipy is python requests wrapper for easily accessing the Ex Libris Alma API. It is designed to be lightweight, and imposes a structure that mimics the [Alma API architecture](https://developers.exlibrisgroup.com/alma/apis).
@@ -18,7 +20,7 @@ Post, Put and Delete functions will be gradually added in future releases.
 | [courses](#access-courses) | X | | | |
 | [resource sharing partners](#access-resource-sharing-partners) | X | | | |
 | [task-lists](#access-task-lists) | X | | | |
-| [users](#access-users) | X | In Progress | | |
+| [users](#access-users) | X | In Progress | | In Progress |
 | [electronic](#access-electronic) | X | | | |
 
 ## Use
@@ -93,20 +95,35 @@ alma.courses.citations(course_id, reading_list_id)
 ### Access Users
 Alma provides a set of Web services for handling user information, enabling you to quickly and easily manipulate user details. These Web services can be used by external systems—such as student information systems (SIS)—to retrieve or update user data.
 ```python
-# Get a list of users or filter on search parameters
-users = alma.users.get(query = {'first_name': 'Sterling', 'last_name': 'Archer'})
+# Retrieve a list of users or filter on search parameters
+users = alma.users.retrieve(query = {'first_name': 'Sterling', 'last_name': 'Archer'})
 
-# get more information on that user
+# Retrieve more information on that user
 user_id = users['user'][0]['primary_id']
-alma.users.get(user_id)
+user = alma.users.retrieve(user_id)
 
-# get all loans or requests for a user. Makes multiple calls if necessary.
-loans = alma.user.loans.get(user_id, all_records = True)
-requests = alma.user.requests.get(user_id, all_records = True)
+# Create a user, providing an identifier and some necessary or even additional data (according to each Alma implementation)
+data = {'first_name': 'Tester #001', 'last_name': 'from Alma',
+        'account_type': {'value': 'EXTERNAL', 'desc': 'External'},
+        'external_id': 'SIS',
+        'contact_info': {
+            'email': [
+                {'email_address': 'alma.tester.001@alma.example',
+                  'email_type': [{'value': 'work', 'desc': 'Work'}]}]}}
+user = alma.users.create(identifier = 'alma.tester.001', id_type = 'primary_id', user_data = data)
+user = alma.users.create(identifier = '20181126001650001', id_type = 'OTHER_ID_1', user_data = data)
 
-# get deposits or fees for a user
-deposits = alma.users.deposits.get(user_id)
-fees = alma.users.fees.get(user_id)
+# Remove a user, providing an identifier.
+response = alma.users.remove(identifier = 'alma.tester.001', id_type = 'primary_id')
+response = alma.users.remove(identifier = '20181126001650001', id_type = 'OTHER_ID_1')
+
+# Retrieve all loans or requests for a user. Makes multiple calls if necessary.
+loans = alma.user.loans.retrieve(user_id, all_records = True)
+requests = alma.user.requests.retrieve(user_id, all_records = True)
+
+# Retrieve deposits or fees for a user
+deposits = alma.users.deposits.Retrieve(user_id)
+fees = alma.users.fees.retrieve(user_id)
 ```
 ### Access Acquisitions
 Alma provides a set of Web services for handling acquisitions information, enabling you to quickly and easily manipulate acquisitions details. These Web services can be used by external systems - such as subscription agent systems - to retrieve or update acquisitions data.
@@ -138,31 +155,31 @@ alma.acq.licenses.get(all_records=True)
 ### Access Configuration Settings
 Alma provides a set of Web services for handling Configuration related information, enabling you to quickly and easily receive configuration details. These Web services can be used by external systems in order to get list of possible data.
 ```python
-# Get libraries, locations, departments, and hours
-libraries = alma.conf.units.get_libaries()
+# Restrieve libraries, locations, departments, and hours
+libraries = alma.conf.units.retrieve_libaries()
 library_id = libraries['library'][0]['code']
-locations = alma.conf.units.get_locations(library_id)
-hours = alma.conf.general.get_hours(library_id)
-departments = alma.conf.units.get_departments()
+locations = alma.conf.units.retrieve_locations(library_id)
+hours = alma.conf.general.retrieve_hours(library_id)
+departments = alma.conf.units.retrieve_departments()
 
-# Get system code tables
+# Retrieve system code tables
 table = 'UserGroups'
-alma.conf.general.get_code_table(table)
+alma.conf.general.retrieve_code_table(table)
 
-# Get scheduled jobs and run history
-jobs = alma.conf.jobs.get()
+# Retrieve scheduled jobs and run history
+jobs = alma.conf.jobs.retrieve()
 job_id = jobs['job'][0]['id']
-run_history = alma.conf.jobs.get_instances(job_id)
+run_history = alma.conf.jobs.retrieve_instances(job_id)
 
-# Get sets and set members
+# Retrieve sets and set members
 sets = alma.conf.sets.get()
 set_id = sets['set'][0]['id']
-set_members = alma.conf.sets.get_members(set_id)
+set_members = alma.conf.sets.retrieve_members(set_id)
 
-# get profiles and reminders
+# Retrieve profiles and reminders
 depost_profiles = alma.conf.deposit_profiles.get()
 import_profiles = alma.conf.import_profiles.get()
-reminders = alma.conf.reminders.get()
+reminders = alma.conf.reminders.retrieve()
 ```
 ### Access Resource Sharing Partners
 Alma provides a set of Web services for handling Resource Sharing Partner information, enabling you to quickly and easily manipulate partner details. These Web services can be used by external systems to retrieve or update partner data.
