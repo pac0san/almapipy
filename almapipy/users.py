@@ -70,6 +70,8 @@ class SubClientUsers(Client):
             args.pop('id_type', None)
             args['primary_id'] = args.pop('identifiers', None)
         """ 
+        print(args)
+
         url = self.cnxn_params['api_uri_full']
         if user_id:
             url += ("/" + str(user_id))
@@ -189,12 +191,17 @@ class SubClientUsers(Client):
             print(response)
             print("")
             """
+            response = self.post(url, data=data, args=args, headers=headers, raw=raw)
+
+            print(response)
+            print("")
+
         else:
             # User already exist in Alma.
             response = {'total_record_count': 0}
 
         return response
-    
+
     def remove(self, identifier, id_type, raw=False):
         """Remove a single user if it does exist in Alma
 
