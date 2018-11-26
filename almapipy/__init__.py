@@ -8,8 +8,6 @@ __name__ = "almapipy"
 __version__ = "1.1.0"
 
 
-import os
-
 from .client import Client
 from .bibs import SubClientBibs
 from .analytics import SubClientAnalytics
