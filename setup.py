@@ -17,7 +17,7 @@ setup(
     long_description=long_description,
 #    long_description_content_type="text/markdown",
     url="https://github.com/UCDavisLibrary/almapipy",
-    install_requires=['json', 'os', 'requests', 'xml.etree.ElementTree'],
+    install_requires=['requests'],
     keywords='alma exlibris exlibrisgroup api bibliographic',
     packages=find_packages(),
     classifiers=[
