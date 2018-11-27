@@ -1,4 +1,4 @@
-#-*- coding: utf-8-unix -*-
+# -*- coding: utf-8 -*-
 
 """
 Common Client for interacting with Alma API

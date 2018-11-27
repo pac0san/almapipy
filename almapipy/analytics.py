@@ -1,4 +1,4 @@
-#-*- coding: utf-8-unix -*-
+# -*- coding: utf-8 -*-
 
 from .client import Client
 from . import utils

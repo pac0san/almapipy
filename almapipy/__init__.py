@@ -1,14 +1,8 @@
-#-*- coding: utf-8-unix -*-
+# -*- coding: utf-8 -*-
 
 """
-Python client for Ex Libris Alma
+Python requests wrapper for the Ex Libris Alma API
 """
-__author__ = "Steve Pelkey (spelkey@ucdavis.edu)"
-__name__ = "almapipy"
-__version__ = "1.1.0"
-
-
-import os
 
 from .client import Client
 from .bibs import SubClientBibs
@@ -21,6 +15,16 @@ from .partners import SubClientPartners
 from .electronic import SubClientElectronic
 from .task_lists import SubClientTaskList
 from . import utils
+
+
+__author__ = "Steve Pelkey"
+__author_email__ = "spelkey@ucdavis.edu"
+__project_name__ = "almapipy"
+__project_description__ = "Python requests wrapper for the Ex Libris Alma API"
+__project_url__ = "https://github.com/UCDavisLibrary/almapipy"
+__license__ = "MIT License"
+__version__ = "0.1.2.dev0"
+__status__ = "Development"
 
 
 class AlmaCnxn(Client):
@@ -70,6 +74,7 @@ class AlmaCnxn(Client):
         # call __validate_key__
         self.cnxn_params['api_key'] = apikey
 
+        # Set 'User-Agent' for REST queries
         self.cnxn_params['User-Agent'] = '{}/{}'.format(__name__,__version__)
 
         # Hook in the various Alma APIs based on what API key can access
