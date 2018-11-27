@@ -20,7 +20,7 @@ Post, Put and Delete functions will be gradually added in future releases.
 | [courses](#access-courses) | X | | | |
 | [resource sharing partners](#access-resource-sharing-partners) | X | | | |
 | [task-lists](#access-task-lists) | X | | | |
-| [users](#access-users) | X | In Progress | | In Progress |
+| [users](#access-users) | X | Testing | Testing  | Testing |
 | [electronic](#access-electronic) | X | | | |
 
 ## Use
@@ -96,7 +96,8 @@ alma.courses.citations(course_id, reading_list_id)
 Alma provides a set of Web services for handling user information, enabling you to quickly and easily manipulate user details. These Web services can be used by external systems—such as student information systems (SIS)—to retrieve or update user data.
 ```python
 
-# Create a user, providing an identifier and some necessary or even additional data (according to each Alma implementation)
+# Create a user, providing an identifier and some necessary or even additional data
+# (according to each Alma implementation)
 data = {'first_name': 'Tester #001', 'last_name': 'from Alma',
         'account_type': {'value': 'EXTERNAL', 'desc': 'External'},
         'external_id': 'SIS',
