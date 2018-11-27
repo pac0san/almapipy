@@ -22,7 +22,7 @@ class Client(object):
         self.cnxn_params = cnxn_params
 
 #    def post(self, url, data, args, object_type, raw=False):
-    def post(self, url, data, args, headers, raw=False):
+    def Post(self, url, data, args, headers, raw=False):
         """
         Uses requests library to make Exlibris API Post call.
         Returns data of type specified during init of base class.
@@ -39,45 +39,52 @@ class Client(object):
             JSON-esque, xml, or raw response.
         """
 
-        # Determine format of data to be posted according to order of importance:
-        # 1) Local declaration, 2) dtype of data parameter, 3) global setting.
-        if 'format' not in args.keys():
-            if type(data) == ET or type(data) == ET.Element:
-                content_type = 'xml'
-            elif type(data) == dict:
-                content_type = 'json'
-            else:
-                content_type = self.cnxn_params['format']
-            args['format'] = self.cnxn_params['format']
-        else:
-            content_type = args['format']
+        data_aux = data.copy()
+        args_aux = args.copy()
 
         # Preserve Auth and add 'User-Agent' and 'content-type' in headers
         headers_aux = headers.copy()
         headers_aux['User-Agent'] = self.cnxn_params['User-Agent']
+
+        # Determine format of data to be posted according to order of importance:
+        # 1) Local declaration, 2) dtype of data parameter, 3) global setting.
+        if 'format' not in args_aux.keys():
+            if type(data_aux) == ET or type(data_aux) == ET.Element:
+                content_type = 'xml'
+            elif type(data_aux) == dict:
+                content_type = 'json'
+            else:
+                content_type = self.cnxn_params['format']
+            args_aux['format'] = self.cnxn_params['format']
+        else:
+            content_type = args_aux['format']
+
+        # Determine 'content-type' and set 'data_aux' format in consecuence
         if content_type == 'json':
             headers_aux['content-type'] = 'application/json'
-            if type(data) != str:
-                data = json.dumps(data)
+            if type(data_aux) != str:
+                data_aux = json.dumps(data_aux)
         elif content_type == 'xml':
             headers_aux['content-type'] = 'application/xml'
-            if type(data) == ET or type(data) == ET.Element:
-                data = ET.tostring(data, encoding='unicode')
-            elif type(data) != str:
+            if type(data_aux) == ET or type(data_aux) == ET.Element:
+                data_aux = ET.tostring(data_aux, encoding='unicode')
+            elif type(data_aux) != str:
                 message = "XML payload must be either string or ElementTree."
                 raise utils.ArgError(message)
         else:
             message = "Post content type must be either 'json' or 'xml'"
             raise utils.ArgError(message)
+
         """
         print("\nDebug: client.py Post #1")
         print(url)
-        print(data)
-        print(args)
+        print(data_aux)
+        print(args_aux)
         print(headers_aux)
         """
+
         # Send request
-        response = requests.post(url, data=data, params=args, headers=headers_aux)
+        response = requests.post(url, data=data_aux, params=args_aux, headers=headers_aux)
         if raw:
             return response
 
@@ -86,7 +93,135 @@ class Client(object):
 
         return content
 
-    def delete(self, url, args, headers, raw=False):
+    def Get(self, url, args, headers, raw=False):
+        """
+        Uses requests library to make Exlibris API Get call.
+        Returns data of type specified during init of base class.
+
+        Args:
+            url (str): Exlibris API endpoint url.
+            args (dict): Query string parameters for API call.
+            headers (dict): API Key Auth in Headers.
+            raw (bool): If true, returns raw response.
+
+        Returns:
+            JSON-esque, xml, or raw response.
+        """
+        
+        args_aux = args.copy()
+        headers_aux = headers.copy()
+        
+        # handle data format. Allow for overriding of global setting.
+        data_format = self.cnxn_params['format']
+        if 'format' not in args_aux.keys():
+            args_aux['format'] = data_format
+
+        # Preserve Auth and add 'User-Agent' in headers
+        headers_aux['User-Agent'] = self.cnxn_params['User-Agent']
+
+        """
+        print("\nDebug: client.py Get #1")
+        print(url)
+        print(args_aux)
+        print(headers_aux)
+        """
+
+        # Send request.
+        response = requests.get(url, params=args_aux, headers=headers_aux)
+
+        """
+        print("\nDebug: client.py Get #2")
+        print(url)
+        print(args_aux)
+        print(headers_aux)
+        print(response)
+        print(raw)
+        print("")
+        """
+
+        if raw:
+            return response
+
+        # Parse content
+        content = self.__parse_response__(response)
+
+        return content
+
+    def Put(self, url, data, headers, raw=False):
+        """
+        Uses requests library to make Exlibris API Put call.
+        Returns data of type specified during init of base class.
+
+        Args:
+            url (str): Exlibris API endpoint url.
+            data (dict): Data to be puted.
+            headers (dict): API Key Auth in Headers.
+#            object_type (str): Type of object to be puted (see alma docs)
+            raw (bool): If true, returns raw response.
+
+        Returns:
+            JSON-esque, xml, or raw response.
+        """
+
+        data_aux = data.copy()
+
+        # Preserve Auth and add 'User-Agent' in headers
+        headers_aux = headers.copy()
+        headers_aux['User-Agent'] = self.cnxn_params['User-Agent']
+        
+        # Determine format of data to be puted according to order of importance:
+        # 1) Local declaration, 2) dtype of data parameter, 3) global setting.
+        if type(data_aux) == ET or type(data_aux) == ET.Element:
+            content_type = 'xml'
+        elif type(data_aux) == dict:
+            content_type = 'json'
+        else:
+            content_type = self.cnxn_params['format']
+
+        # Determine 'content-type' and set 'data_aux' format in consecuence
+        if content_type == 'json':
+            headers_aux['content-type'] = 'application/json'
+            if type(data_aux) != str:
+                data_aux = json.dumps(data_aux)
+        elif content_type == 'xml':
+            headers_aux['content-type'] = 'application/xml'
+            if type(data_aux) == ET or type(data_aux) == ET.Element:
+                data_aux = ET.tostring(data_aux, encoding='unicode')
+            elif type(data_aux) != str:
+                message = "XML payload must be either string or ElementTree."
+                raise utils.ArgError(message)
+        else:
+            message = "Put content type must be either 'json' or 'xml'"
+            raise utils.ArgError(message)
+
+        """
+        print("\nDebug: client.py Put #1")
+        print(url)
+        print(data_aux)
+        print(headers_aux)
+        """
+
+        # Send request
+        response = requests.put(url, data=data_aux, headers=headers_aux)
+
+        """
+        print("\nDebug: client.py Put #2")
+        print(url)
+        print(data_aux)
+        print(headers_aux)
+        print(response)
+        print("")
+        """
+
+        if raw:
+            return response
+
+        # Parse content
+        content = self.__parse_response__(response)
+
+        return content
+
+    def Delete(self, url, args, headers, raw=False):
         """
         Uses requests library to make Exlibris API Delete call.
         Returns data of type specified during init of base class.
@@ -101,70 +236,52 @@ class Client(object):
             JSON-esque, xml, or raw response.
         """
 
+        args_aux = args.copy()
+
         # Preserve Auth and add 'User-Agent' in headers
         headers_aux = headers.copy()
         headers_aux['User-Agent'] = self.cnxn_params['User-Agent']
 
+        # Determine format of data to be posted
+        if 'format' not in args_aux.keys():
+            args_aux['format'] = self.cnxn_params['format']
+
+        # Determine 'content-type'
+        if args_aux['format'] == 'json':
+            headers_aux['content-type'] = 'application/json'
+        elif args_aux['format'] == 'xml':
+            headers_aux['content-type'] = 'application/xml'
+        else:
+            message = "Post content type must be either 'json' or 'xml'"
+            raise utils.ArgError(message)
+
+        """
         print("\nDebug: client.py Delete #1")
         print(url)
         print(args)
         print(headers_aux)
-        print("")
+        """
 
         # Send request
-        response = requests.delete(url, params=args, headers=headers_aux)
+        response = requests.delete(url, params=args_aux, headers=headers_aux)
 
+        """
+        print("\nDebug: client.py Delete #2")
         print(response)
         print("")
+        """
 
         if raw:
             return response
 
+#TODO: Eval exception 204
+        """
         # Parse content
         content = self.__parse_response__(response)
 
         return content
-
-    def get(self, url, args, headers, raw=False):
         """
-        Uses requests library to make Exlibris API Get call.
-        Returns data of type specified during init of base class.
-
-        Args:
-            url (str): Exlibris API endpoint url.
-            args (dict): Query string parameters for API call.
-            headers (dict): API Key Auth in Headers.
-            raw (bool): If true, returns raw response.
-
-        Returns:
-            JSON-esque, xml, or raw response.
-        """
-#        print(url)
-
-        # handle data format. Allow for overriding of global setting.
-        data_format = self.cnxn_params['format']
-        if 'format' not in args.keys():
-            args['format'] = data_format
-        data_format = args['format']
-
-        # Preserve Auth and add 'User-Agent' in headers
-        headers_aux = headers.copy()
-        headers_aux['User-Agent'] = self.cnxn_params['User-Agent']
-        """
-        print("\nDebug: client.py Get #1")
-        print(url)
-        print(args)
-        print(headers_aux)
-        """
-        # Send request.
-        response = requests.get(url, params=args, headers=headers_aux)
-        if raw:
-            return response
-
-        # Parse content
-        content = self.__parse_response__(response)
-
-        return content
+        return response
 
     def __format_query__(self, query):
         """Converts dictionary of brief search query to a formated string.
@@ -191,7 +308,7 @@ class Client(object):
 
         return q_str
 
-    def __get_all__(self, url, args, headers, raw, response, data_key, max_limit=100):
+    def __Get_all__(self, url, args, headers, raw, response, data_key, max_limit=100):
         """Makes multiple API calls until all records for a query are retrieved.
             Called by the 'all_records' parameter.
 
@@ -268,7 +385,7 @@ class Client(object):
         status = response.status_code
         url = response.url
         try:
-            response_type = response.headers['Content-Type']
+            response_type = response.headers['content-type']
             if ";" in response_type:
                 response_type, charset = response_type.split(";")
         except:

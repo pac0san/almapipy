@@ -12,10 +12,10 @@ from almapipy.__init__ import __author_email__ as author_email
 from almapipy.__init__ import __project_url__ as url
 from almapipy.__init__ import __project_description__ as description
 from almapipy.__init__ import __license__ as license
-
+from almapipy.__init__ import __project_name__ as name
 
 setup(
-    name = "almapipy",
+    name = name,
     version = version,
     author = author,
     author_email = author_email,

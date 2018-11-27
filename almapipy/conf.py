@@ -39,7 +39,7 @@ class SubClientConfigurationUnits(Client):
     def __init__(self, cnxn_params={}):
         self.cnxn_params = cnxn_params.copy()
 
-    def retrieve_libaries(self, library_id=None, q_params={}, raw=False):
+    def read_libaries(self, library_id=None, q_params={}, raw=False):
         """Retrieve a list of libraries or a specific library
 
         Args:
@@ -62,7 +62,7 @@ class SubClientConfigurationUnits(Client):
         response = self.get(url, args, raw=raw)
         return response
 
-    def retrieve_locations(self, library_id, location_id=None, q_params={}, raw=False):
+    def read_locations(self, library_id, location_id=None, q_params={}, raw=False):
         """Retrieve a list of locations for a library
 
         Args:
@@ -86,7 +86,7 @@ class SubClientConfigurationUnits(Client):
         response = self.get(url, args, raw=raw)
         return response
 
-    def retrieve_departments(self, q_params={}, raw=False):
+    def read_departments(self, q_params={}, raw=False):
         """Retrieve a list of configured departments
 
         Args:
@@ -113,7 +113,7 @@ class SubClientConfigurationGeneral(Client):
     def __init__(self, cnxn_params={}):
         self.cnxn_params = cnxn_params.copy()
 
-    def retrieve(self, library_id=None, q_params={}, raw=False):
+    def read(self, library_id=None, q_params={}, raw=False):
         """Retrieve general configuration of the institution
 
         Args:
@@ -134,7 +134,7 @@ class SubClientConfigurationGeneral(Client):
         response = self.get(url, args, raw=raw)
         return response
 
-    def retrieve_hours(self, library_id=None, q_params={}, raw=False):
+    def read_hours(self, library_id=None, q_params={}, raw=False):
         """Retrieve open hours as configured in Alma.
         Note that the library-hours do not necessarily reflect when the
         library doors are actually open, but rather start and end times that
@@ -165,7 +165,7 @@ class SubClientConfigurationGeneral(Client):
         response = self.get(url, args, raw=raw)
         return response
 
-    def retrieve_code_table(self, table_name, q_params={}, raw=False):
+    def read_code_table(self, table_name, q_params={}, raw=False):
         """This API returns all rows defined for a code-table.
 
         The main usage of this API is for applications that use Alma APIs,
@@ -200,7 +200,7 @@ class SubClientConfigurationJobs(Client):
         self.cnxn_params['api_uri'] += '/jobs'
         self.cnxn_params['api_uri_full'] += '/jobs'
 
-    def retrieve(self, job_id=None, limit=10, offset=0, all_records=False,
+    def read(self, job_id=None, limit=10, offset=0, all_records=False,
             q_params={}, raw=False):
         """Retrieve a list of jobs that can be submitted or details for a given job.
 
@@ -247,7 +247,7 @@ class SubClientConfigurationJobs(Client):
                                          response=response, data_key='job')
         return response
 
-    def retrieve_instances(self, job_id, instance_id=None, limit=10, offset=0,
+    def read_instances(self, job_id, instance_id=None, limit=10, offset=0,
                            all_records=False, q_params={}, raw=False):
         """Retrieve all the job instances (runs) for a given job id, or specific instance.
 
@@ -308,7 +308,7 @@ class SubClientConfigurationSets(Client):
         self.cnxn_params['api_uri'] += '/sets'
         self.cnxn_params['api_uri_full'] += '/sets'
 
-    def retrieve(self, set_id=None, content_type=None, set_type=None,
+    def read(self, set_id=None, content_type=None, set_type=None,
             query={}, limit=10, offset=0, all_records=False,
             q_params={}, raw=False):
         """Retrieve a list of sets or a single set.
@@ -366,7 +366,7 @@ class SubClientConfigurationSets(Client):
                                          response=response, data_key='set')
         return response
 
-    def retrieve_members(self, set_id, limit=10, offset=0, all_records=False,
+    def read_members(self, set_id, limit=10, offset=0, all_records=False,
                     q_params={}, raw=False):
         """Retrieves members of a Set given a Set ID.
 
@@ -416,7 +416,7 @@ class SubClientConfigurationDeposit(Client):
         self.cnxn_params['api_uri'] += '/deposit-profiles'
         self.cnxn_params['api_uri_full'] += '/deposit-profiles'
 
-    def retrieve(self, deposit_profile_id=None, limit=10, offset=0, all_records=False,
+    def read(self, deposit_profile_id=None, limit=10, offset=0, all_records=False,
             q_params={}, raw=False):
         """Retrieves list of deposit profiles or specific profile
 
@@ -469,7 +469,7 @@ class SubClientConfigurationImport(Client):
         self.cnxn_params['api_uri'] += '/md-import-profiles'
         self.cnxn_params['api_uri_full'] += '/md-import-profiles'
 
-    def retrieve(self, profile_id=None, limit=10, offset=0, all_records=False,
+    def read(self, profile_id=None, limit=10, offset=0, all_records=False,
                  q_params={}, raw=False):
         """Retrieves list of import profiles or specific profile
 
@@ -523,7 +523,7 @@ class SubClientConfigurationReminders(Client):
         self.cnxn_params['api_uri'] += '/reminders'
         self.cnxn_params['api_uri_full'] += '/reminders'
 
-    def retrieve(self, reminder_id=None, limit=10, offset=0, all_records=False,
+    def read(self, reminder_id=None, limit=10, offset=0, all_records=False,
                  q_params={}, raw=False):
         """Retrieves list of reminders or specific reminder.
 
