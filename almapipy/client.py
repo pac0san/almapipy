@@ -75,14 +75,6 @@ class Client(object):
             message = "Post content type must be either 'json' or 'xml'"
             raise utils.ArgError(message)
 
-        """
-        print("\nDebug: client.py Post #1")
-        print(url)
-        print(data_aux)
-        print(args_aux)
-        print(headers_aux)
-        """
-
         # Send request
         response = requests.post(url, data=data_aux, params=args_aux, headers=headers_aux)
         if raw:
@@ -119,25 +111,8 @@ class Client(object):
         # Preserve Auth and add 'User-Agent' in headers
         headers_aux['User-Agent'] = self.cnxn_params['User-Agent']
 
-        """
-        print("\nDebug: client.py Get #1")
-        print(url)
-        print(args_aux)
-        print(headers_aux)
-        """
-
         # Send request.
         response = requests.get(url, params=args_aux, headers=headers_aux)
-
-        """
-        print("\nDebug: client.py Get #2")
-        print(url)
-        print(args_aux)
-        print(headers_aux)
-        print(response)
-        print(raw)
-        print("")
-        """
 
         if raw:
             return response
@@ -194,24 +169,8 @@ class Client(object):
             message = "Put content type must be either 'json' or 'xml'"
             raise utils.ArgError(message)
 
-        """
-        print("\nDebug: client.py Put #1")
-        print(url)
-        print(data_aux)
-        print(headers_aux)
-        """
-
         # Send request
         response = requests.put(url, data=data_aux, headers=headers_aux)
-
-        """
-        print("\nDebug: client.py Put #2")
-        print(url)
-        print(data_aux)
-        print(headers_aux)
-        print(response)
-        print("")
-        """
 
         if raw:
             return response
@@ -255,21 +214,8 @@ class Client(object):
             message = "Post content type must be either 'json' or 'xml'"
             raise utils.ArgError(message)
 
-        """
-        print("\nDebug: client.py Delete #1")
-        print(url)
-        print(args)
-        print(headers_aux)
-        """
-
         # Send request
         response = requests.delete(url, params=args_aux, headers=headers_aux)
-
-        """
-        print("\nDebug: client.py Delete #2")
-        print(response)
-        print("")
-        """
 
         if raw:
             return response

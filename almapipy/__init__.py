@@ -24,7 +24,7 @@ __project_name__ = "almapipy"
 __project_description__ = "Python requests wrapper for the Ex Libris Alma API"
 __project_url__ = "https://github.com/UCDavisLibrary/almapipy"
 __license__ = "MIT License"
-__version__ = "0.1.2.dev2"
+__version__ = "0.1.2.dev3"
 __status__ = "Development"
 
 

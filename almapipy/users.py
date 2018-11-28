@@ -30,6 +30,11 @@ class SubClientUsers(Client):
         self.fees = SubClientUsersFees(self.cnxn_params)
         self.deposits = SubClientUsersDeposits(self.cnxn_params)
 
+        # Returned values by functions on success/failure (not much "creativity"
+        # for now)
+        self.SUCCESS = True
+        self.FAILURE = False
+
     def create(self, identifier, id_type, user_data, raw=False):
         """Create a single user if it does not exist yet in Alma
 
@@ -51,7 +56,7 @@ class SubClientUsers(Client):
 
         Returns: (?)
             The user (at Alma) if a new user is created.
-            "{'total_record_count': 0}" if the 'identifier' was already set. 
+            "FAILURE" if the 'identifier' was already set. 
 
         """
 
@@ -77,15 +82,6 @@ class SubClientUsers(Client):
         # Search for a user with this 'user_identifier'
         response = self.Get(url, args=args, headers=headers, raw=raw)
 
-        """
-        print("\nDebug: users.py Create #1")
-        print(headers)
-        print(url)
-        print(args)
-        print(response)
-        print("")
-        """
-
 # TODO: ¿what happens when no response? Parse 'requests.models.Response'
         if response['total_record_count'] == 0:
             # No user exists with this 'identifier': Let's create it.
@@ -107,25 +103,12 @@ class SubClientUsers(Client):
 
             args.pop('q', None)
 
-            """
-            print("\nDebug: users.py Create #2")
-            print(headers)
-            print(url)
-            print(args)
-            print(data)
-            """
-
             # Send request
             response = self.Post(url, data=data, args=args, headers=headers, raw=raw)
 
-            """
-            print(response)
-            print("")
-            """
-
         else:
             # User already exist in Alma.
-            response = {'total_record_count': 0}
+            response = self.FAILURE
 
         return response
 
@@ -157,16 +140,11 @@ class SubClientUsers(Client):
 
         args = q_params.copy()
 
+        # Set 'API Key' as 'Authorization' at the Header
         headers = {'Authorization': 'apikey {}'.format(self.cnxn_params['api_key'])}
 
-        """
-        print("\nDebug: users.py Read #1")
-        print(query)
-        print(args)
-        print("")
-        """
-
         url = self.cnxn_params['api_uri_full']
+
         if user_id:
             url += ("/" + str(user_id))
         else:
@@ -187,15 +165,6 @@ class SubClientUsers(Client):
         response = self.Get(url, args=args, headers=headers, raw=raw)
         if user_id:
             return response
-
-        """
-        print("\nDebug: users.py Read #2")
-        print(url)
-        print(args)
-        print(headers)
-        print(response)
-        print("")
-        """
 
         # make multiple api calls until all records are retrieved
         if all_records:
@@ -222,51 +191,30 @@ class SubClientUsers(Client):
             raw (bool): If true, returns raw requests object.
 
         Returns: (?)
-            "{'total_record_count': 1}" if the user was updated successfully.
-            "{'total_record_count': 0}" if there were any trouble. 
+            "SUCCESS" if the user was updated successfully.
+            "FAILURE" if there were any trouble. 
 
         """
-
+        
+        # Set 'API Key' as 'Authorization' at the Header
         headers = {'Authorization': 'apikey {}'.format(self.cnxn_params['api_key'])}
+
         url = self.cnxn_params['api_uri_full'] + "/" + str(primary_id)
 
-        # Search for a user with this 'primary_id'
+        # Search for a user with this 'primary_id' included in the URL
         response = self.Get(url, args={}, headers=headers, raw=raw)
-
-        """
-        print("\nDebug: users.py Update #1")
-        print(headers)
-        print(url)
-        print(user_data)
-        print(response)
-        """
 
 # TODO: ¿what happens when no response? Parse 'requests.models.Response'
         if response['primary_id']:
             # Found an user with this 'primary_id': Let's update it.
 
-            """
-            print("\nDebug: users.py Update #3")
-            print(user_data)
-            """
-
             # Send request
             self.Put(url, data=user_data, headers=headers, raw=raw)
-            response = {'total_record_count': 1}
-
-            """
-            print("\nDebug: users.py Update #4")
-            print(headers)
-            print(url)
-            print(user_data)
-            print(response)
-            print(raw)
-            print("")
-            """
+            response = self.SUCCESS
 
         else:
             # (a single) User not found in Alma.
-            response = {'total_record_count': 0}
+            response = self.FAILURE
 
         return response
 
@@ -283,8 +231,8 @@ class SubClientUsers(Client):
             raw (bool): If true, returns raw requests object.
 
         Returns: (?)
-            "{'total_record_count': 1}" if the user has been successfully removed.
-            "{'total_record_count': 0}" if the 'identifier' was not present in Alma.
+            "SUCCESS" if the user has been successfully removed.
+            "FAILURE" if the 'identifier' was not present in Alma.
 
         """
 
@@ -307,43 +255,20 @@ class SubClientUsers(Client):
         # Search for a user with this 'user_identifier'
         response = self.Get(url, args=args, headers=headers, raw=raw)
 
-        """
-        print("\nDebug: users.py delete #1")
-        print(headers)
-        print(url)
-        print(args)
-        print(response)
-        """
-
 # TODO: ¿what happens when no response? Parse 'requests.models.Response'
         if response['total_record_count'] == 1:
             # A single user exists with this 'identifier': Let's remove it.
             args.clear()
             args['primary_id'] = query['primary_id']
             url += (str('/' + args['primary_id']))
-
-            """
-            print("\nDebug: users.py delete #2")
-            print(headers)
-            print(url)
-            print(args)
-            """
-
             # Send request
 # SEE: "TODO: Eval exception 204" at the end of Delete 'function' in 'client.py'
 #            response = self.Delete(url, args=args, headers=headers, raw=raw)
             self.Delete(url, args=args, headers=headers, raw=raw)
-            response = {'total_record_count': 1}
-
-            """
-            print("\nDebug: users.py delete #3")
-            print(response)
-            print("")
-            """
-
+            response = self.SUCCESS
         else:
             # (a single) User not found in Alma.
-            response = {'total_record_count': 0}
+            response = self.FAILURE
 
         return response
 
