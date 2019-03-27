@@ -221,4 +221,4 @@ alma.task_lists.lending.get(library_id)
 ## Attribution and Contact
 
 
-* **Author**: [Steve Pelkey](mailto:spelkey@ucdavis.edu)
+* **Author**: [Steve Pelkey](mailto:spelkey@ucdavis.edu), [Fco. Sanchez](mailto:GitHub@minarnet.es)
