@@ -18,8 +18,8 @@ from .task_lists import SubClientTaskList
 from . import utils
 
 
-__author__ = "Steve Pelkey"
-__author_email__ = "spelkey@ucdavis.edu"
+__author__ = "Steve Pelkey, Fco. Sanchez"
+__author_email__ = "spelkey@ucdavis.edu, GitHub@minarnet.es"
 __project_name__ = "almapipy"
 __project_description__ = "Python requests wrapper for the Ex Libris Alma API"
 __project_url__ = "https://github.com/pac0san/almapipy"
