@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # almapipy: Python Wrapper for Alma API
 
